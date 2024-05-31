@@ -9,16 +9,22 @@ def generateGamesPieChart(userId):
     df = pd.read_csv("achievements.csv",encoding = "ISO-8859-1")
     countsArray = []
     gamesArray = []
-    for game in df.groupby("Game"):
-        if game[0] in df.groupby("Game")["Name"].count().sort_values(ascending=False).head(10):
-            gamesArray.append(game[0])
+    for x in df.groupby("Game").count().sort_values(["Name"],ascending=False).iterrows():
+        countsArray.append(x[1]["Name"])
+        if(float(x[1]["Name"]) / len(df.index) > 0.02):
+            if len(x[0]) > 16:
+                gamesArray.append(x[0][:16] + "...")
+            else:
+                gamesArray.append(x[0])
         else:
             gamesArray.append("")
-    for count in df.groupby("Game")["Name"].count():
-        countsArray.append(count)
+    countsArray.reverse()
+    gamesArray.reverse()
     plt.figure(figsize=(15,9))
-    plt.pie(countsArray,labels=gamesArray,startangle = 90)
-    plt.show()    
+    plt.pie(countsArray,labels=gamesArray,startangle = 90,rotatelabels=True,labeldistance=0.4)
+    plt.title("Achievements by Game")
+    plt.savefig("achievementsGame.png",bbox_inches='tight')
+   
 
 #Generate graph of achivements by month
 def generateAchievementsMonthGraph(userId):
@@ -65,6 +71,5 @@ def generateAchievementsMonthGraph(userId):
     plt.savefig("achievementsMonth.png")
 
     
-
 
 
