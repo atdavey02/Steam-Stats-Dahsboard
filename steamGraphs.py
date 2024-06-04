@@ -4,8 +4,7 @@ import pandas as pd
 
 
 #generate pie chart achivements by game
-def generateGamesPieChart(userId):
-    getPlayerAchievements(userId)
+def generateGamesPieChart():
     df = pd.read_csv("achievements.csv",encoding = "ISO-8859-1")
     countsArray = []
     gamesArray = []
@@ -27,8 +26,7 @@ def generateGamesPieChart(userId):
    
 
 #Generate graph of achivements by month
-def generateAchievementsMonthGraph(userId):
-    achievementsByMonth(userId)
+def generateAchievementsMonthGraph():
     df = pd.read_csv("achievementsMonth.csv")
     monthsArray = []
     achievementsArray = []
@@ -70,6 +68,10 @@ def generateAchievementsMonthGraph(userId):
     plt.ylabel("Achievements Earned")
     plt.savefig("achievementsMonth.png")
 
-    
+
+def generateGraphs(user,key):
+    achievementsByMonth(user,key)
+    generateAchievementsMonthGraph()
+    generateGamesPieChart()
 
 
