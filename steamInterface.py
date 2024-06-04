@@ -1,4 +1,5 @@
 from steamFunctions import *
+from steamGraphs import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 
@@ -63,15 +64,44 @@ class Homepage(QMainWindow):
         loadingContainer.setLayout(loadingLayout)
         loadingContainer.setStyleSheet("background-color: #161920 ")
 
+        self.statsHeader = QLabel("Here Are Your Stats")
+        self.statsHeader.setFont(loadingFont)
+        self.achievementsLabel = QLabel("See Acheivements By Game")
+        self.monthsLabel = QLabel("See Achievments by Month")
+        self.playersLabel = QLabel("See How Popular Your Owned Games Are")
+        statsLayout= QVBoxLayout()
+        statsLayout.addWidget(self.statsHeader)
+        statsLayout.addWidget(self.achievementsLabel)
+        statsLayout.addWidget(self.monthsLabel)
+        statsLayout.addWidget(self.playersLabel)
+        statsContainer = QWidget()
+        statsContainer.setLayout(statsLayout)
+        statsContainer.setStyleSheet("color: white; background-color: #161920")
+
+        def loadNext():
+            self.setCentralWidget(statsContainer)
+            self.setWindowTitle("Your Stats")
 
         def getValues():
             key = self.APIID.text()
             user = self.SteamID.text()
             self.setCentralWidget(loadingContainer)
             self.setWindowTitle("Loading")
+            self.dataCollector = dataCollector(user,key)
+            self.dataCollector.finished.connect(loadNext)
+            self.dataCollector.start()
 
 
 
+class dataCollector(QThread):
+    def __init__(self,user,key):
+        super().__init__()
+        self.user = user
+        self.key = key
+
+    def run(self):
+        generateGraphs(self.user,self.key)
+        getPlayerAmounts(self.user,self.key)
 
 
 app = QApplication([])
