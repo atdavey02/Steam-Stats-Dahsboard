@@ -4,8 +4,6 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 
 
-
-
 class Homepage(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -65,18 +63,32 @@ class Homepage(QMainWindow):
         loadingContainer.setStyleSheet("background-color: #161920 ")
 
         self.statsHeader = QLabel("Here Are Your Stats")
+        self.statsHeader.setStyleSheet("background-color: #096295; min-height: 80px;")
         self.statsHeader.setFont(loadingFont)
         self.achievementsLabel = QLabel("See Acheivements By Game")
         self.monthsLabel = QLabel("See Achievments by Month")
         self.playersLabel = QLabel("See How Popular Your Owned Games Are")
-        statsLayout= QVBoxLayout()
-        statsLayout.addWidget(self.statsHeader)
-        statsLayout.addWidget(self.achievementsLabel)
-        statsLayout.addWidget(self.monthsLabel)
-        statsLayout.addWidget(self.playersLabel)
+        self.playersButton = QPushButton("Here")
+        self.playersButton.setStyleSheet("color: white; background-color: #096295")
+        self.playersButton.clicked.connect(lambda: loadGamesPopularity())
+        statsLayout= QGridLayout()
+        statsLayout.addWidget(self.statsHeader,0,0)
+        statsLayout.addWidget(self.achievementsLabel,1,0)
+        statsLayout.addWidget(self.monthsLabel,2,0)
+        statsLayout.addWidget(self.playersLabel,3,0)
+        statsLayout.addWidget(self.playersButton,4,1)
         statsContainer = QWidget()
         statsContainer.setLayout(statsLayout)
         statsContainer.setStyleSheet("color: white; background-color: #161920")
+
+        self.playersHeader = QLabel("How Popular are the Games You Own?")
+        self.playersHeader.setStyleSheet("background-color: #096295; min-height: 80px;")
+        self.playersHeader.setFont(loadingFont)
+        self.top5Label = QLabel("Here Are The 5 Most Popular Games in Your Steam Library:")
+        playersLayout = QVBoxLayout()
+        playersLayout.addWidget(self.playersHeader)
+        playersLayout.addWidget(self.top5Label)
+
 
         def loadNext():
             self.setCentralWidget(statsContainer)
@@ -90,7 +102,20 @@ class Homepage(QMainWindow):
             self.dataCollector = dataCollector(user,key)
             self.dataCollector.finished.connect(loadNext)
             self.dataCollector.start()
-
+        
+        def loadGamesPopularity():
+            df = pd.read_csv('totalPlayers.csv',encoding = "ISO-8859-1")
+            df = df.sort_values(by=["Players"],ascending=False)
+            df = df.head(5)
+            for row in df.iterrows():
+                self.newLabel = QLabel(row[1]["Game"] + ": " + str(row[1]["Players"]))
+                playersLayout.addWidget(self.newLabel)
+            playersContainer = QWidget()
+            playersContainer.setLayout(playersLayout)
+            playersContainer.setStyleSheet("color: white; background-color: #161920")
+            self.setCentralWidget(playersContainer)
+            self.setWindowTitle("Games by Popularity")
+            
 
 
 class dataCollector(QThread):
@@ -102,7 +127,7 @@ class dataCollector(QThread):
     def run(self):
         generateGraphs(self.user,self.key)
         getPlayerAmounts(self.user,self.key)
-
+      
 
 app = QApplication([])
 
