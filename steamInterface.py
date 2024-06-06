@@ -2,6 +2,7 @@ from steamFunctions import *
 from steamGraphs import *
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
+from PyQt6.QtGui import *
 
 monthsDict = {
     "01": "January",
@@ -22,8 +23,8 @@ class Homepage(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setMinimumSize(QSize(1300, 700))
-        self.SteamID= QLineEdit("")
-        self.APIID = QLineEdit("")
+        self.SteamID= QLineEdit()
+        self.APIID = QLineEdit()
         self.enterButton = QPushButton("Enter")
         self.welcomeLabel = QLabel()
         self.welcomeLabel.setText("Welcome to the Steam Stats Dashboard!")
@@ -79,7 +80,10 @@ class Homepage(QMainWindow):
         self.statsHeader = QLabel("Here Are Your Stats")
         self.statsHeader.setStyleSheet("background-color: #096295; min-height: 80px;")
         self.statsHeader.setFont(loadingFont)
-        self.achievementsLabel = QLabel("See Acheivements By Game")
+        self.achievementsLabel = QLabel("See Achievements By Game")
+        self.achievementsButton = QPushButton("Here")
+        self.achievementsButton.setStyleSheet("color: white; background-color: #096295")
+        self.achievementsButton.clicked.connect(lambda: loadAchievements())
         self.monthsLabel = QLabel("See Achievments by Month")
         self.monthsButton = QPushButton("Here")
         self.monthsButton.setStyleSheet("color: white; background-color: #096295")
@@ -91,6 +95,7 @@ class Homepage(QMainWindow):
         statsLayout= QGridLayout()
         statsLayout.addWidget(self.statsHeader,0,0)
         statsLayout.addWidget(self.achievementsLabel,1,0)
+        statsLayout.addWidget(self.achievementsButton,1,1)
         statsLayout.addWidget(self.monthsLabel,2,0)
         statsLayout.addWidget(self.monthsButton,2,1)
         statsLayout.addWidget(self.playersLabel,3,0)
@@ -98,6 +103,14 @@ class Homepage(QMainWindow):
         statsContainer = QWidget()
         statsContainer.setLayout(statsLayout)
         statsContainer.setStyleSheet("color: white; background-color: #161920")
+
+        self.achievementsHeader = QLabel("What Games do you Have the Most Achievements in?")
+        self.achievementsHeader.setStyleSheet("background-color: #096295; min-height: 80px;")
+        self.achievementsHeader.setFont(loadingFont)
+        self.top5AchievementsLabel = QLabel("Here Are The 5 Games you Have Earned the Most Achievments in:")
+        achievementsLayout = QVBoxLayout()
+        achievementsLayout.addWidget(self.achievementsHeader)
+        achievementsLayout.addWidget(self.top5AchievementsLabel)
 
         self.playersHeader = QLabel("How Popular are the Games You Own?")
         self.playersHeader.setStyleSheet("background-color: #096295; min-height: 80px;")
@@ -154,6 +167,22 @@ class Homepage(QMainWindow):
             monthsContainer.setStyleSheet("color: white; background-color: #161920")
             self.setCentralWidget(monthsContainer)
             self.setWindowTitle("Top Months")
+
+        def loadAchievements():
+            df = pd.read_csv('achievements.csv',encoding = "ISO-8859-1")
+            for row in df.groupby("Game").count().sort_values(["Name"],ascending=False).head(5).iterrows():
+                self.newLabel = QLabel(row[0] + ": " + str(row[1]["Name"]))
+                achievementsLayout.addWidget(self.newLabel)
+            graphLabel = QLabel()
+            graph = QPixmap('achievementsGame.png')
+            graph = graph.scaledToWidth(400)
+            graphLabel.setPixmap(graph)
+            achievementsLayout.addWidget(graphLabel)
+            achievementsContainer = QWidget()
+            achievementsContainer.setLayout(achievementsLayout)
+            achievementsContainer.setStyleSheet("color: white; background-color: #161920")
+            self.setCentralWidget(achievementsContainer)
+            self.setWindowTitle("Top Games")
             
 
 
