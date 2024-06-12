@@ -29,6 +29,8 @@ def getGames(userId,key):
     gamesList = []
     for item in jsonn['response']['games']: 
         print('Game = ' ,item['name'], 'Id = ' , item['appid'])
+        print(item['playtime_forever'])
+        print(datetime.fromtimestamp(item['rtime_last_played']).strftime('%Y-%m-%d %H:%M:%S')[:10])
         gamesList.append((item['appid'],item['name']))
     return gamesList
     
@@ -52,6 +54,7 @@ def getPlayerAchievements(userId,key):
 def getPlayerAmounts(userId,key):
     file = open('totalPlayers.csv','w', newline='')
     writer = csv.writer(file)
+    writer.writerow(["Game","Players"])
     gamesList = getGames(userId,key)
     for item in gamesList:
         r2 =  requests.get(f'http://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={item[0]}').text
@@ -78,3 +81,18 @@ def achievementsByMonth(userId,key):
     writer.writerow(["Month","Achievement Amount"])
     for key, value in times_dict.items():
         writer.writerow([key,value])
+
+#Gets amount of time user has spent in each game
+def getPlayTimes(userId,key):
+    r = requests.get(f'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={key}&steamid={userId}&include_appinfo=1 ').text
+    jsonn = json.loads(r)
+    file = open('gamesPlaytime.csv','w',newline='')
+    writer = csv.writer(file)
+    writer.writerow(["Game","Playtime"])
+    for item in jsonn['response']['games']: 
+        print('Game = ' ,item['name'], 'Time = ' , item['playtime_forever'])
+        writer.writerow([item['name'],item['playtime_forever']])
+        
+
+
+
