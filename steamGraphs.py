@@ -68,10 +68,25 @@ def generateAchievementsMonthGraph():
     plt.ylabel("Achievements Earned")
     plt.savefig("achievementsMonth.png")
 
+def generateGamesPlaytimePieChart():
+    df = pd.read_csv("gamesPlaytime.csv",encoding = "ISO-8859-1")
+    df = df.sort_values(["Playtime"],ascending=False)
+    labelsArray=[]
+    for row in df.iterrows():
+        if row[1]["Playtime"] / df["Playtime"].sum() > 0.02:
+            if(len(row[1]["Game"]) > 16):
+               labelsArray.append(row[1]["Game"][:16] + "...") 
+            else:
+                labelsArray.append(row[1]["Game"])
+        else:
+           labelsArray.append("") 
+    plt.figure(figsize=(15,9))
+    plt.pie(df['Playtime'],labels=labelsArray,startangle = 90,rotatelabels=True,labeldistance=0.4)
+    plt.savefig("playtimes.png",bbox_inches='tight')
 
 def generateGraphs(user,key):
     achievementsByMonth(user,key)
+    getPlayTimes(user,key)
     generateAchievementsMonthGraph()
     generateGamesPieChart()
-
-
+    generateGamesPlaytimePieChart()
